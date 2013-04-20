@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android" >
+    
+    <ListPreference
+        android:defaultValue="0"
+        android:key="pref_key_reading_mode"
+        android:title="@string/reading_mode"
+        android:entries="@array/readingModesTitles"
+        android:entryValues="@array/readingModes"
+        />
+
+    <Preference
+        android:key="pref_key_font_size"
+        android:summary="@string/pref_summary_font_size"
+        android:title="@string/pref_title_font_size" />
+
+    <PreferenceCategory android:title="@string/pref_category_highlighting" >
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_key_highlight_first_words"
+            android:title="@string/pref_title_highlight_first_words"/>
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_key_highlight_fragments"
+            android:title="@string/pref_title_highlight_fragments" />
+
+        <Preference
+            android:key="pref_key_highlight_brightness"
+            android:title="@string/pref_title_highlight_brightness" />
+    </PreferenceCategory>
+
+</PreferenceScreen>

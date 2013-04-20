@@ -1,0 +1,20 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android" >
+
+    <item
+        android:id="@+id/menu_library"
+        android:title="@string/menu_library">
+    </item>
+    <item
+        android:id="@+id/menu_book_info"
+        android:title="@string/menu_book_info">
+    </item>
+    <item
+        android:id="@+id/menu_navigation"
+        android:title="@string/menu_navigation">
+    </item>
+    <item
+        android:id="@+id/menu_settings"
+        android:showAsAction="never"
+        android:title="@string/menu_settings"/>
+
+</menu>
