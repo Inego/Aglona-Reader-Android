@@ -1983,8 +1983,6 @@ public class ParallelTextData {
 		
 		InitializeColors();
 
-		setBrightness(0.85f);
-
 		// ADVANCED MODE POPUP
 		popUpInfo = new PopUpInfo();
 		Pen AdvancedHighlightPen = new Pen(0xFF4682B4, 2.0F);

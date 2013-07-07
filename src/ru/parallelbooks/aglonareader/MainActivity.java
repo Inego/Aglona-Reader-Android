@@ -89,6 +89,8 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 					"pref_key_highlight_first_words", false);
 			pTD.HighlightFragments = prefs.getBoolean(
 					"pref_key_highlight_fragments", false);
+			
+			pTD.setBrightness(prefs.getFloat("pref_key_highlight_brightness", 0.85f));
 
 			pTD.bookOpened = prefs.getBoolean("load_file", false);
 
@@ -208,6 +210,8 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		edit.putString("files", serializedList);
 
 		edit.putBoolean("load_file", pTD.bookOpened);
+		
+		edit.putFloat("pref_key_highlight_brightness", (float) pTD.brightness);
 
 		edit.commit();
 
