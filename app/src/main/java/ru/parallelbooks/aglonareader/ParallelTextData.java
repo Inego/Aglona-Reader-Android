@@ -1710,7 +1710,7 @@ public class ParallelTextData {
 
 	public void UpdateScreen() {
 		PrepareScreen();
-		pTV.invalidate();
+		pTV.invalidateParallelText();
 	}
 
 	public void ProcessLayoutChange(boolean computeNumberOfScreenLines) {
@@ -2219,7 +2219,7 @@ public class ParallelTextData {
 		}
 
 		if (needToRender)
-			pTV.invalidate();
+			pTV.invalidateParallelText();
 	}
 
 	private void DeterminePopupPosition(ArrayList<WordInfo> c,

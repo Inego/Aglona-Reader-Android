@@ -1,5 +1,7 @@
 package ru.parallelbooks.aglonareader;
 
+import android.util.Log;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -255,6 +257,8 @@ public class ParallelText {
 					else if (value.equals("6")) {
 						p.SetStructureLevel((byte) 3);
 						addToContents(3);
+					} else {
+						Log.d("###", "Value = " + value);
 					}
 
 					value_s = reader.getAttributeValue(1);

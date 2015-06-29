@@ -4,17 +4,10 @@ import android.content.SharedPreferences;
 import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.ListPreference;
-import android.preference.Preference;
-import android.preference.Preference.OnPreferenceClickListener;
 import android.preference.PreferenceActivity;
-
-
-
 
 public class PreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	
-	public static final int SETTINGS_RESULT_FONT_SIZE = 1;
-	public static final int SETTINGS_RESULT_HIGHLIGHT_BRIGHTNESS = 2;
 	public static final String KEY_READING_MODE = "pref_key_reading_mode";
 	
 	private ListPreference lpReadingMode;
@@ -25,39 +18,13 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 		super.onCreate(savedInstanceState);
 
 		addPreferencesFromResource(R.xml.preferences);
-		
-		findPreference("pref_key_font_size").setOnPreferenceClickListener(
-				new OnPreferenceClickListener() {
-					
-					@Override
-					public boolean onPreferenceClick(Preference preference) {
-						setResult(SETTINGS_RESULT_FONT_SIZE);
-						finish();
-						return true;
-					}
-				});
-		
-		findPreference("pref_key_highlight_brightness").setOnPreferenceClickListener(
-				new OnPreferenceClickListener() {
-					
-					@Override
-					public boolean onPreferenceClick(Preference preference) {
-						setResult(SETTINGS_RESULT_HIGHLIGHT_BRIGHTNESS);
-						finish();
-						return true;
-					}
-				});
-		
-		
-		lpReadingMode = (ListPreference) getPreferenceScreen().findPreference(KEY_READING_MODE);
-		
 
+		lpReadingMode = (ListPreference) getPreferenceScreen().findPreference(KEY_READING_MODE);
 	}
 	
 	@Override
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
-		
 		ParallelTextData pTD = ParallelTextData.getInstance();
 		
 		if (key.equals("pref_key_highlight_first_words"))
@@ -98,11 +65,4 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 		super.onPause();
 		getPreferenceScreen().getSharedPreferences().unregisterOnSharedPreferenceChangeListener(this);
 	}
-	
-	
-
-	
-	
-	
-
 }

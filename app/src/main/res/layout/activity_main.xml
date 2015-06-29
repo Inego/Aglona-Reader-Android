@@ -10,15 +10,6 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content" />
 
-    <SeekBar
-        android:id="@+id/seekBar"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center_vertical"
-        android:background="#a0ffffff"
-        android:max="1000"
-        android:visibility="invisible" />
-
     <TextView
         android:id="@+id/emptyBookView"
         android:layout_width="wrap_content"

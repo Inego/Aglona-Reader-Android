@@ -21,6 +21,8 @@ import android.preference.PreferenceManager;
 import android.util.Base64;
 import android.util.Base64InputStream;
 import android.util.Base64OutputStream;
+import android.view.ContextMenu;
+import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -69,6 +71,7 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		setContentView(R.layout.activity_main);
 
 		pTC = (ParallelTextView) findViewById(R.id.parallelTextView);
+		registerForContextMenu(pTC);
 
 		boolean pTDExisted = ParallelTextData.instanceExists();
 
@@ -116,40 +119,6 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		}
 
 		seekBarMode = SEEKBAR_MODE_OFF;
-
-		SeekBar sb = (SeekBar) findViewById(R.id.seekBar);
-
-		sb.setOnSeekBarChangeListener(new OnSeekBarChangeListener() {
-
-			@Override
-			public void onStopTrackingTouch(SeekBar seekBar) {
-
-			}
-
-			@Override
-			public void onStartTrackingTouch(SeekBar seekBar) {
-
-			}
-
-			@Override
-			public void onProgressChanged(SeekBar seekBar, int progress,
-					boolean fromUser) {
-
-				switch (seekBarMode) {
-				case SEEKBAR_MODE_FONT:
-					pTD.fontProportion = progress;
-					pTD.setFontSize(true);
-					break;
-				case SEEKBAR_MODE_BRIGHTESS:
-					pTD.brightness = 0.0004f * progress + 0.6f;
-					pTD.SetColorsByBrightness();
-					pTC.invalidate();
-					break;
-				}
-
-			}
-		});
-
 		fileLoaderTask = (FileLoaderTask<MainActivity>) getLastNonConfigurationInstance();
 
 		if (fileLoaderTask != null)
@@ -163,6 +132,20 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 	protected void onResume() {
 		super.onResume();
 		pTD.TurnAdvancedPopupOff();
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+		super.onCreateContextMenu(menu, v, menuInfo);
+
+		if (v == pTC) {
+			getMenuInflater().inflate(R.menu.activity_main, menu);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		return onOptionsItemSelected(item);
 	}
 
 	@Override
@@ -213,6 +196,8 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		
 		edit.putFloat("pref_key_highlight_brightness", (float) pTD.brightness);
 
+		edit.putInt("font_proportion", pTD.fontProportion);
+
 		edit.commit();
 
 		super.onPause();
@@ -262,58 +247,9 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		super.onDestroy();
 	}
 
-	void setSeekBarMode(int newSeekBarMode) {
-
-		seekBarMode = newSeekBarMode;
-
-		SeekBar sb = (SeekBar) findViewById(R.id.seekBar);
-
-		switch (seekBarMode) {
-		case SEEKBAR_MODE_FONT:
-			sb.setProgress(pTD.fontProportion);
-			break;
-		case SEEKBAR_MODE_BRIGHTESS:
-			sb.setProgress((int) ((pTD.brightness - 0.6f) * 2500));
-			break;
-		}
-
-		sb.setVisibility(seekBarMode == 0 ? View.INVISIBLE : View.VISIBLE);
-
-		if (seekBarMode != 0) {
-			pTD.TurnAdvancedPopupOff();
-		} else {
-
-			// Save font size to shared preferences
-
-			SharedPreferences sharedPreferences = PreferenceManager
-					.getDefaultSharedPreferences(this);
-			SharedPreferences.Editor editor = sharedPreferences.edit();
-			editor.putInt("font_proportion", pTD.fontProportion);
-			editor.commit();
-
-		}
-
-	}
-
 	@Override
 	protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-
-		if (requestCode == REQUEST_CODE_SETTINGS) {
-
-			switch (resultCode) {
-
-			case PreferencesActivity.SETTINGS_RESULT_FONT_SIZE:
-				setSeekBarMode(SEEKBAR_MODE_FONT);
-				return;
-
-			case PreferencesActivity.SETTINGS_RESULT_HIGHLIGHT_BRIGHTNESS:
-				setSeekBarMode(SEEKBAR_MODE_BRIGHTESS);
-				return;
-			}
-
-		}
-
-		else if (requestCode == REQUEST_CODE_LIBRARY) {
+		if (requestCode == REQUEST_CODE_LIBRARY) {
 			switch (resultCode) {
 			case LibraryActivity.OPEN_FILE:
 
@@ -449,6 +385,21 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		
 		fileLoaderTask = null;
 
+	}
+
+	@Override
+	public boolean onKeyDown(int keyCode, KeyEvent event) {
+		if (pTC != null) {
+			if (keyCode == KeyEvent.KEYCODE_VOLUME_DOWN) {
+				pTC.goToNextPage();
+				return true;
+			} else if (keyCode == KeyEvent.KEYCODE_VOLUME_UP) {
+				pTC.goToPreviousPage();
+				return true;
+			}
+		}
+
+		return super.onKeyDown(keyCode, event);
 	}
 
 	public static String objectToString(Serializable object) {

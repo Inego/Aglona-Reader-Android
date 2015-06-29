@@ -9,11 +9,6 @@
         android:entryValues="@array/readingModes"
         />
 
-    <Preference
-        android:key="pref_key_font_size"
-        android:summary="@string/pref_summary_font_size"
-        android:title="@string/pref_title_font_size" />
-
     <PreferenceCategory android:title="@string/pref_category_highlighting" >
         <CheckBoxPreference
             android:defaultValue="true"
@@ -23,10 +18,6 @@
             android:defaultValue="true"
             android:key="pref_key_highlight_fragments"
             android:title="@string/pref_title_highlight_fragments" />
-
-        <Preference
-            android:key="pref_key_highlight_brightness"
-            android:title="@string/pref_title_highlight_brightness" />
     </PreferenceCategory>
 
 </PreferenceScreen>
