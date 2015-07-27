@@ -1255,7 +1255,9 @@ public class ParallelTextData {
 	}
 
 	public void ComputeNumberOfScreenLines() {
-		NumberOfScreenLines = (int) ((viewHeight - 2 * vMargin) / lineHeight);
+        //NumberOfScreenLines = (int) ((viewHeight - (2 * vMargin)) / lineHeight);
+        // Paint fewer lines of text to provide bottom margin - <crw>:
+        NumberOfScreenLines = (int) ((viewHeight - (5 * vMargin)) / lineHeight);		
 
 		LastFullScreenLine = NumberOfScreenLines - 1;
 
@@ -1958,8 +1960,11 @@ public class ParallelTextData {
 		
 		wordsOnScreen = new TreeMap<Integer, ArrayList<ScreenWord>>();
 
-		vMargin = 0;
-		PanelMargin = 3;
+        //vMargin = 0;
+        vMargin = 8; // Increase top text border for legibility - <crw>
+        //PanelMargin = 3;
+        PanelMargin = 10; // Increase left/right text borders for legibility - <crw>
+
 		SplitterRatio = 0.5f;
 		splitterWidth = 7;
 

@@ -7,8 +7,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-
-import org.xmlpull.v1.XmlPullParser;
+// AS marks as "unused" - <crw> import org.xmlpull.v1.XmlPullParser;
 
 import android.app.Activity;
 import android.content.Intent;
