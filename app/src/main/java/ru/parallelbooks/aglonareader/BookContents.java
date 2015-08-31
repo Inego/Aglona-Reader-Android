@@ -9,7 +9,7 @@ public class BookContents {
 		public int level;
 	}
 	
-	ArrayList<Chapter> chapters;
+	final ArrayList<Chapter> chapters;
 	
 	public BookContents() {
 		

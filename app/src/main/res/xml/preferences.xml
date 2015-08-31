@@ -18,6 +18,20 @@
             android:defaultValue="true"
             android:key="pref_key_highlight_fragments"
             android:title="@string/pref_title_highlight_fragments" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_key_speak_text"
+            android:title="@string/pref_title_speak_text" />
+        <CheckBoxPreference
+            android:defaultValue="true"
+            android:key="pref_key_sound_effects"
+            android:title="@string/pref_title_sound_effects" />
+    </PreferenceCategory>
+
+    // I found no simple way to implement "Done" control, so: (crw)
+    <PreferenceCategory android:title=" "></PreferenceCategory> // draw a line
+    <PreferenceCategory
+        android:title="        Use [Back] button to return">
     </PreferenceCategory>
 
 </PreferenceScreen>

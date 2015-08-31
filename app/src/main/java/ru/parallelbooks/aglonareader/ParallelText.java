@@ -26,15 +26,15 @@ public class ParallelText {
 
 	public String info;
 
-	public String fileName;
+	// --Commented out by Inspection (08/20/15 7:36 PM):public String fileName;
 
-	public ArrayList<TextPair> textPairs;
+	public final ArrayList<TextPair> textPairs;
 
 	// / Contains a list of pairs which are at least partially computed.
 	// / It is used for speedy truncating.
-	public ArrayList<TextPair> computedPairs;
+	public final ArrayList<TextPair> computedPairs;
 	
-	public BookContents contents;
+	public final BookContents contents;
 	
 	public int contentsSide;
 
@@ -52,19 +52,23 @@ public class ParallelText {
 		return textPairs.get(pairIndex);
 	}
 
-	public void AddPair(String text1, String text2, boolean startParagraph1,
-			boolean startParagraph2) {
-		TextPair newPair = textPairs.size() == 0 ? new TextPair(text1, text2,
-				true, true) : new TextPair(text1, text2, startParagraph1,
-				startParagraph2);
+// --Commented out by Inspection START (08/20/15 7:44 PM):
+//	public void AddPair(String text1, String text2, boolean startParagraph1,
+//			boolean startParagraph2) {
+//		TextPair newPair = textPairs.size() == 0 ? new TextPair(text1, text2,
+//				true, true) : new TextPair(text1, text2, startParagraph1,
+//				startParagraph2);
+//
+//		textPairs.add(newPair);
+//
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:44 PM)
 
-		textPairs.add(newPair);
-
-	}
-
-	public void AddPair(String text1, String text2) {
-		AddPair(text1, text2, true, true);
-	}
+// --Commented out by Inspection START (08/20/15 7:36 PM):
+//	public void AddPair(String text1, String text2) {
+//		AddPair(text1, text2, true, true);
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:36 PM)
 
 	public void Truncate() {
 		for (TextPair p : computedPairs)
@@ -162,7 +166,7 @@ public class ParallelText {
 
 	}
 
-	public boolean Load(XmlPullParser reader) {
+	private boolean Load(XmlPullParser reader) {
 
 		int eventType;
 		try {
@@ -307,7 +311,7 @@ public class ParallelText {
 		
 	}
 
-	void UpdateAggregates(int pairIndex) {
+	private void UpdateAggregates(int pairIndex) {
 		int accLength;
 
 		if (pairIndex == 0)

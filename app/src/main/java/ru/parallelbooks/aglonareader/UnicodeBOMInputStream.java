@@ -88,19 +88,21 @@ public class UnicodeBOMInputStream extends InputStream
       return description;
     }
 
-    /**
-     * Returns the bytes corresponding to this <code>BOM</code> value.
-     */
-    public final byte[] getBytes()
-    {
-      final int     length = bytes.length;
-      final byte[]  result = new byte[length];
-
-      // Make a defensive copy
-      System.arraycopy(bytes,0,result,0,length);
-
-      return result;
-    }
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//    /**
+//     * Returns the bytes corresponding to this <code>BOM</code> value.
+//     */
+//    public final byte[] getBytes()
+//    {
+//      final int     length = bytes.length;
+//      final byte[]  result = new byte[length];
+//
+//      // Make a defensive copy
+//      System.arraycopy(bytes,0,result,0,length);
+//
+//      return result;
+//    }
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
     private BOM(final byte bom[], final String description)
     {
@@ -194,17 +196,19 @@ public class UnicodeBOMInputStream extends InputStream
       in.unread(bom,0,read);
   }
 
-  /**
-   * Returns the <code>BOM</code> that was detected in the wrapped
-   * <code>InputStream</code> object.
-   * 
-   * @return a <code>BOM</code> value.
-   */
-  public final BOM getBOM()
-  {
-    // BOM type is immutable.
-    return bom;
-  }
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//  /**
+//   * Returns the <code>BOM</code> that was detected in the wrapped
+//   * <code>InputStream</code> object.
+//   *
+//   * @return a <code>BOM</code> value.
+//   */
+//  public final BOM getBOM()
+//  {
+//    // BOM type is immutable.
+//    return bom;
+//  }
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
   /**
    * Skips the <code>BOM</code> that was found in the wrapped
@@ -215,14 +219,13 @@ public class UnicodeBOMInputStream extends InputStream
    * @throws IOException when trying to skip the BOM from the wrapped
    * <code>InputStream</code> object.
    */
-  public final synchronized UnicodeBOMInputStream skipBOM() throws IOException
+  public final synchronized void skipBOM() throws IOException
   {
     if (!skipped)
     {
       in.skip(bom.bytes.length);
       skipped = true;
     }
-    return this;
   }
 
   /**

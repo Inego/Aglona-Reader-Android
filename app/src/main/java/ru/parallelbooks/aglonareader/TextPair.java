@@ -7,48 +7,58 @@ public class TextPair {
 	public int aggregateSize = 0;
 	public int totalTextSize = 0;
 
-	public String Substring(byte side, int startPosition, int length) {
-		if (side == (byte) 1)
-			return text1.substring(startPosition, length);
-		else
-			return text2.substring(startPosition, length);
+// --Commented out by Inspection START (08/20/15 7:40 PM):
+//	public String Substring(byte side, int startPosition, int length) {
+//		if (side == (byte) 1)
+//			return text1.substring(startPosition, length);
+//		else
+//			return text2.substring(startPosition, length);
+//
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:40 PM)
 
-	}
-
-	public String Substring(byte side, int startPosition) {
-		if (side == (byte) 1)
-			return text1.substring(startPosition);
-		else
-			return text2.substring(startPosition);
-	}
+// --Commented out by Inspection START (08/20/15 7:40 PM):
+//	public String Substring(byte side, int startPosition) {
+//		if (side == (byte) 1)
+//			return text1.substring(startPosition);
+//		else
+//			return text2.substring(startPosition);
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:40 PM)
 
 	public RenderedTextInfo RenderedInfo(byte side) {
 		return side == (byte) 1 ? renderedInfo1 : renderedInfo2;
 	}
 
-	private int recommended_natural1;
-	private int recommended_natural2;
+	// --Commented out by Inspection (08/20/15 7:45 PM):private int recommended_natural1;
+	// --Commented out by Inspection (08/20/15 7:45 PM):private int recommended_natural2;
 
-	public void IncRecommendedNatural(byte side) {
-		if (side == (byte) 1)
-			recommended_natural1++;
-		else
-			recommended_natural2++;
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	public void IncRecommendedNatural(byte side) {
+//		if (side == (byte) 1)
+//			recommended_natural1++;
+//		else
+//			recommended_natural2++;
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
-	public void DecRecommendedNatural(byte side) {
-		if (side == (byte) 1)
-			recommended_natural1--;
-		else
-			recommended_natural2--;
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	public void DecRecommendedNatural(byte side) {
+//		if (side == (byte) 1)
+//			recommended_natural1--;
+//		else
+//			recommended_natural2--;
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
-	public int GetRecommendedNatural(byte side) {
-		if (side == (byte) 1)
-			return recommended_natural1;
-		else
-			return recommended_natural2;
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	public int GetRecommendedNatural(byte side) {
+//		if (side == (byte) 1)
+//			return recommended_natural1;
+//		else
+//			return recommended_natural2;
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
 	public byte structureLevel;
 
@@ -85,20 +95,22 @@ public class TextPair {
 
 	public int height;
 
-	public RenderedTextInfo renderedInfo1;
-	public RenderedTextInfo renderedInfo2;
+	public final RenderedTextInfo renderedInfo1;
+	public final RenderedTextInfo renderedInfo2;
 
 	private ArrayList<WordInfo> computedWords1;
 	private ArrayList<WordInfo> computedWords2;
 	public boolean ContinueFromNewLine1;
     public boolean ContinueFromNewLine2;
 
-	public char GetChar(byte side, int charIndex) {
-		if (side == (byte) 1)
-			return text1.charAt(charIndex);
-		else
-			return text2.charAt(charIndex);
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	public char GetChar(byte side, int charIndex) {
+//		if (side == (byte) 1)
+//			return text1.charAt(charIndex);
+//		else
+//			return text2.charAt(charIndex);
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
 	public ArrayList<WordInfo> ComputedWords(byte side, boolean createNew) {
 		if (side == (byte) 1) {
@@ -164,12 +176,14 @@ public class TextPair {
 		
 	}
 
-	int GetLength(byte side) {
-		if (side == (byte) 1)
-			return text1.length();
-		else
-			return text2.length();
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	int GetLength(byte side) {
+//		if (side == (byte) 1)
+//			return text1.length();
+//		else
+//			return text2.length();
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
 	void SetStructureLevel(byte p) {
 		structureLevel = p;
@@ -178,20 +192,24 @@ public class TextPair {
 		
 	}
 	
-	String GetText(byte side) {
-		if (side == (byte) 1)
-			return text1;
-		else
-			return text2;
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	String GetText(byte side) {
+//		if (side == (byte) 1)
+//			return text1;
+//		else
+//			return text2;
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
 	boolean StartParagraph(byte side) {
 		return side == (byte) 1 ? startParagraph1 : startParagraph2;
 	}
 
-	void UpdateTotalSize() {
-		totalTextSize = text1.length() + text2.length();
-	}
+// --Commented out by Inspection START (08/20/15 7:41 PM):
+//	void UpdateTotalSize() {
+//		totalTextSize = text1.length() + text2.length();
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:41 PM)
 
 	public boolean AllLinesComputed(byte side) {
 		return (side == (byte) 1) ? allLinesComputed1 : allLinesComputed2;

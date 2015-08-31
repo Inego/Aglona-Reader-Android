@@ -9,10 +9,11 @@ import android.widget.TextView;
 
 public class BookInfoActivity extends Activity {
 
-	ParallelText pText;
-	ParallelTextData pTD;
+	private ParallelText pText;
+	private ParallelTextData pTD;
+//	public ParallelTextView pTV;
 
-	void fillFields() {
+	private void fillFields() {
 		if (pTD.reversed) {
 			
 			((TextView) findViewById(R.id.lang1)).setText(pText.lang2);
@@ -76,7 +77,8 @@ public class BookInfoActivity extends Activity {
 				pTD.TurnAdvancedPopupOff();
 				pTD.pText.Truncate();
 				pTD.PrepareScreen();
-				
+				pTD.pTV.invalidateParallelText(); // update screen
+
 			}
 		});
 		

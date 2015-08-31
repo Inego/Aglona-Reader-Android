@@ -5,12 +5,14 @@ import android.content.SharedPreferences.OnSharedPreferenceChangeListener;
 import android.os.Bundle;
 import android.preference.ListPreference;
 import android.preference.PreferenceActivity;
+import android.util.Log;
 
 public class PreferencesActivity extends PreferenceActivity implements OnSharedPreferenceChangeListener {
 	
-	public static final String KEY_READING_MODE = "pref_key_reading_mode";
+	private static final String KEY_READING_MODE = "pref_key_reading_mode";
 	
 	private ListPreference lpReadingMode;
+	private MainActivity mainAct;
 
 	@SuppressWarnings("deprecation")
 	@Override
@@ -26,29 +28,33 @@ public class PreferencesActivity extends PreferenceActivity implements OnSharedP
 	public void onSharedPreferenceChanged(SharedPreferences sharedPreferences,
 			String key) {
 		ParallelTextData pTD = ParallelTextData.getInstance();
-		
+		mainAct = MainActivity.getInstance();
+
 		if (key.equals("pref_key_highlight_first_words"))
 			pTD.HighlightFirstWords = sharedPreferences.getBoolean(key, false);
 		else if (key.equals("pref_key_highlight_fragments"))
 			pTD.HighlightFragments= sharedPreferences.getBoolean(key, false);
+		else if (key.equals("pref_key_speak_text"))
+			pTD.SpeakText = sharedPreferences.getBoolean(key, false);
+		else if (key.equals("pref_key_sound_effects"))
+			MainActivity.DoSoundEffects = sharedPreferences.getBoolean(key, false);
 		else if (key.equals(KEY_READING_MODE))
 		{
 			lpReadingMode.setSummary(lpReadingMode.getEntry());
-			
+
 			String layoutModeString = sharedPreferences.getString(KEY_READING_MODE, "0");
-			
+
 			if (layoutModeString.equals("0"))
 				pTD.LayoutMode = 0;
 			else if (layoutModeString.equals("1"))
 				pTD.LayoutMode = 1;
 			else if (layoutModeString.equals("2"))
 				pTD.LayoutMode = 2;
-			
+
 			pTD.SetLayoutMode();
 			pTD.ProcessLayoutChange(false);
-			
+
 		}
-		
 	}
 	
 	@SuppressWarnings("deprecation")

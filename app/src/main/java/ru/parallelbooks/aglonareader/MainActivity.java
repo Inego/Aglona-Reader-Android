@@ -7,58 +7,90 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import java.util.ArrayList;
-// AS marks as "unused" - <crw> import org.xmlpull.v1.XmlPullParser;
 
 import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.SharedPreferences.Editor;
 import android.content.res.Configuration;
-import android.graphics.Path.FillType;
+import android.media.AudioManager;
+import android.media.SoundPool;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.speech.tts.TextToSpeech;
 import android.util.Base64;
 import android.util.Base64InputStream;
 import android.util.Base64OutputStream;
+import android.util.Log;
 import android.view.ContextMenu;
 import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewDebug;
 import android.view.Window;
 import android.view.WindowManager;
-import android.widget.SeekBar;
 import android.widget.Toast;
-import android.widget.SeekBar.OnSeekBarChangeListener;
 
-public class MainActivity extends Activity implements OnFileLoadingComplete {
+public class MainActivity extends Activity implements OnFileLoadingComplete, TextToSpeech.OnInitListener {
 
 	private ParallelTextView pTC;
 
 	private ParallelTextData pTD;
 
-	final static int REQUEST_CODE_SETTINGS = 1;
-	final static int REQUEST_CODE_BOOK_INFO = 2;
-	final static int REQUEST_CODE_LIBRARY = 3;
-	final static int REQUEST_CODE_NAVIGATION = 4;
+	private final static int REQUEST_CODE_SETTINGS = 1;
+	private final static int REQUEST_CODE_BOOK_INFO = 2;
+	private final static int REQUEST_CODE_LIBRARY = 3;
+	private final static int REQUEST_CODE_NAVIGATION = 4;
 
-	final static int SEEKBAR_MODE_OFF = 0;
-	final static int SEEKBAR_MODE_FONT = 1;
-	final static int SEEKBAR_MODE_BRIGHTESS = 2;
+	private final static int SEEKBAR_MODE_OFF = 0;
+	// --Commented out by Inspection (08/20/15 7:38 PM):final static int SEEKBAR_MODE_FONT = 1;
+	// --Commented out by Inspection (08/20/15 7:39 PM):final static int SEEKBAR_MODE_BRIGHTESS = 2;
+	// --Commented out by Inspection (08/20/15 7:39 PM):final static float FONT_SIZE_MIN = 8.0f;
+	// --Commented out by Inspection (08/20/15 7:39 PM):final static float FONT_SIZE_STEP = .025f;
 
-	int seekBarMode;
+	// --Commented out by Inspection (08/20/15 7:39 PM):final static int DIALOG_OPEN_FILE = 1;
 
-	final static float FONT_SIZE_MIN = 8.0f;
-	final static float FONT_SIZE_STEP = .025f;
+	private FileLoaderTask<MainActivity> fileLoaderTask;
+	protected SoundPool sp;
+	protected int soundIds[];
+	public static boolean DoSoundEffects;
 
-	final static int DIALOG_OPEN_FILE = 1;
+	// Callback required for TextToSpeech:
+	public static TextToSpeech speakT;
 
-	FileLoaderTask<MainActivity> fileLoaderTask;
+	// So we can make a Toast from ParallelTextData.java:
+	static MainActivity statMain;
+
+	public static MainActivity getInstance() {
+		return statMain;
+	}
+
+	@Override
+	public void onInit(int status) {
+		Log.e("Main", "OnInit - Status [" + status + "]");
+		if (status == TextToSpeech.ERROR) {
+			pTD.SpeakText = false;
+			Toast.makeText(this, R.string.tts_init_fail, Toast.LENGTH_LONG).show();
+		}
+	}
 
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
-
 		super.onCreate(savedInstanceState);
+
+		/* todo: on some platforms, first use of speech and switch to new language incurs delay
+		of several seconds.  Possibly remedy this by starting two threads as in following:
+		http://stackoverflow.com/questions/26994354/android-two-instances-of-text-to-speech-work-very-slowly
+	*/
+//		Log.e("Main", "creating TextToSpeech..");
+		speakT = new TextToSpeech(this, this);
+//		Log.e("Main", "TextToSpeech created.");
+		// Hack to preload engine:
+		MainActivity.speakT.speak("o", TextToSpeech.QUEUE_FLUSH, null);
+//		Log.e("Main", "TextToSpeech engine startup finished.");
+
+		statMain = this; // Needed by getInstance()
 
 		// Remove title bar
 		this.requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -66,7 +98,6 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		// Remove notification bar
 		this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN,
 				WindowManager.LayoutParams.FLAG_FULLSCREEN);
-
 		setContentView(R.layout.activity_main);
 
 		pTC = (ParallelTextView) findViewById(R.id.parallelTextView);
@@ -91,7 +122,11 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 					"pref_key_highlight_first_words", false);
 			pTD.HighlightFragments = prefs.getBoolean(
 					"pref_key_highlight_fragments", false);
-			
+			//todo: integral TTS speed control
+			pTD.SpeakText = prefs.getBoolean("pref_key_speak_text", false);
+			DoSoundEffects = prefs.getBoolean("pref_key_sound_effects", false);
+//			Log.e("Main", "set SoundEffects to " + Boolean.toString(DoSoundEffects));
+
 			pTD.setBrightness(prefs.getFloat("pref_key_highlight_brightness", 0.85f));
 
 			pTD.bookOpened = prefs.getBoolean("load_file", false);
@@ -109,15 +144,13 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 				Object fromString = stringToObject(serializedFileList);
 				pTD.fileUsageInfo = (ArrayList<FileUsageInfo>) fromString;
 			}
-
-			if (pTD.fileUsageInfo.size() == 0 || !pTD.bookOpened)
-				startLibraryActivity();
-			else
-				LoadFromFile(pTD.fileUsageInfo.get(0).FileName);
-
+//crw			if (pTD.fileUsageInfo.size() == 0 || !pTD.bookOpened) {
+			if (pTD.fileUsageInfo == null || !pTD.bookOpened)
+                    startLibraryActivity();
+                else
+                    LoadFromFile(pTD.fileUsageInfo.get(0).FileName);
 		}
-
-		seekBarMode = SEEKBAR_MODE_OFF;
+//		int seekBarMode = SEEKBAR_MODE_OFF;
 		fileLoaderTask = (FileLoaderTask<MainActivity>) getLastNonConfigurationInstance();
 
 		if (fileLoaderTask != null)
@@ -125,6 +158,19 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 
 		pTC.updateNoBookVisibility();
 
+		// Setup for SoundPool.play (sound effects) <crw>
+		sp = new SoundPool(10, AudioManager.STREAM_SYSTEM, 0);
+
+		soundIds = new int[10];
+		soundIds[0] = sp.load(this, R.raw.pop1, 1);
+		soundIds[1] = sp.load(this, R.raw.hund_hz_saw_qsec, 1);
+		soundIds[2] = sp.load(this, R.raw.cwnoise3, 1);
+		soundIds[3] = sp.load(this, R.raw.pageturn2, 1);
+		soundIds[4] = sp.load(this, R.raw.lm_hz_sine_pt06_sec, 1);
+		soundIds[5] = sp.load(this, R.raw.pluck3, 1);
+		soundIds[6] = sp.load(this, R.raw.pluck4, 1);
+
+		if (DoSoundEffects) SoundEffect(0, 1, 1, 1); // Startup sound
 	}
 
 	@Override
@@ -204,7 +250,7 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 
 	@Override
 	public boolean onOptionsItemSelected(MenuItem item) {
-
+	//todo: make submenus return to parent instead of application:
 		Intent intent;
 
 		switch (item.getItemId()) {
@@ -234,16 +280,10 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 
 	}
 
-	public void startLibraryActivity() {
+	private void startLibraryActivity() {
 		Intent intent;
 		intent = new Intent(this, LibraryActivity.class);
 		startActivityForResult(intent, REQUEST_CODE_LIBRARY);
-	}
-
-	@Override
-	protected void onDestroy() {
-
-		super.onDestroy();
 	}
 
 	@Override
@@ -328,7 +368,7 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 
 	}
 
-	public void setLayoutModeAsPreference() {
+	private void setLayoutModeAsPreference() {
 		SharedPreferences prefs = PreferenceManager
 				.getDefaultSharedPreferences(this);
 
@@ -401,7 +441,7 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		return super.onKeyDown(keyCode, event);
 	}
 
-	public static String objectToString(Serializable object) {
+	private static String objectToString(Serializable object) {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		try {
 			new ObjectOutputStream(out).writeObject(object);
@@ -421,7 +461,7 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 		return null;
 	}
 
-	public static Object stringToObject(String encodedObject) {
+	private static Object stringToObject(String encodedObject) {
 		try {
 			return new ObjectInputStream(new Base64InputStream(
 					new ByteArrayInputStream(encodedObject.getBytes()),
@@ -430,6 +470,30 @@ public class MainActivity extends Activity implements OnFileLoadingComplete {
 			e.printStackTrace();
 		}
 		return null;
+	}
+
+	public void onDestroy() {
+//		Log.e("ondestroy: ", "start");
+		if (speakT != null) {
+			Log.e("ondestroy: ", "stopping");
+			speakT.stop();
+			speakT.shutdown();
+			Log.e("ondestroy: ", "stopped & shut down");
+		}
+		super.onDestroy();
+	}
+
+	public void SoundEffect(int soundId, float lVol, float rVol, float Rate) {
+//		Log.e("Main.SE", "playing " + Integer.toString(soundId));
+
+		// play (int soundID, float leftVolume, float rightVolume, int priority, int loop, float rate)
+		// Rate can be 0.5 .. 2.0:
+		if ((Rate > 2) || (Rate < 0.5)) Rate = 1;
+		// Volumes can be 0.0 .. 1.0:
+		if ((lVol > 1) || (lVol < 0)) lVol = 1;
+		if ((rVol > 1) || (rVol < 0)) lVol = 1;
+//		final int play = sp.play(soundIds[soundId], lVol, rVol, 1, 0, Rate);
+		sp.play(soundIds[soundId], lVol, rVol, 1, 0, Rate);
 	}
 
 }

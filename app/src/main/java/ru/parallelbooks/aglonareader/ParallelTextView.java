@@ -2,7 +2,7 @@ package ru.parallelbooks.aglonareader;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
+//import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
@@ -16,10 +16,11 @@ import android.widget.TextView;
 
 
 public class ParallelTextView extends View {
-	ParallelTextData pTD;
-	MainActivity mainActivity;
 
-	public float splitterMoveOffset;
+	ParallelTextData pTD;
+	private final MainActivity mainActivity;
+
+	private float splitterMoveOffset;
 
 	private final int BACKGROUND_COLOR = 0xFFFFFFFF;
 
@@ -36,13 +37,15 @@ public class ParallelTextView extends View {
 	private final int STATE_PAGEDRAGREVERTING = 6;
 	private final int STATE_SCALING           = 7;
 	private final int STATE_BRIGHTNESS_CHANGE = 8;
+	private final int STATE_SCROLL            = 9;
 
 	private int state = STATE_IDLE;
-
 	private int firstDownPointerId;
 	private int secondDownPointerId;
 	private float pointerDownPositionX;
 	private float pointerDownPositionY;
+	private float scrollY;
+	private float lastBrightY;
 
 	private float initialScalingDistance;
 	private int initialFontProportion;
@@ -50,12 +53,8 @@ public class ParallelTextView extends View {
 	private double initialBrightness;
 
 	private long lastSingleTapTime;
-	private final int DOUBLE_TAP_DELAY = 500;
-
-	private LongTapTimer longTapTimer = new LongTapTimer();
+	private final LongTapTimer longTapTimer = new LongTapTimer();
 	private final int LONG_TAP_DELAY = 500;
-
-	private float MIN_MOVE_DELTA_INCH = 0.1f;
 
 	// Bitmaps are made static to avoid memory leaks on Android 2.3.3 and lower
 	private static Bitmap currentPageBitmap;
@@ -69,12 +68,11 @@ public class ParallelTextView extends View {
 
 	private static Bitmap shadowBitmap;
 	private float shadowWidth;
-	private RectF shadowRect = new RectF();
+	private final RectF shadowRect = new RectF();
 
 	private boolean suppressParallelTextRedrawing = false;
 
 	private long pageAnimationStartTime;
-	private final long PAGE_ANIMATION_DURATION = 300;
 
 	public ParallelTextView(Context context, AttributeSet attrs) {
 		super(context, attrs);
@@ -119,14 +117,14 @@ public class ParallelTextView extends View {
 			case MotionEvent.ACTION_DOWN:
 			case MotionEvent.ACTION_POINTER_DOWN:
 				switch (state) {
-					case STATE_IDLE:
+					case STATE_IDLE: // A finger is down, start timer for options popup:
 						setState(STATE_POINTERDOWN);
 						longTapTimer.start();
 						pointerDownPositionX = x;
 						pointerDownPositionY = y;
 						firstDownPointerId = pointerId;
 						return true;
-					case STATE_POINTERDOWN:
+					case STATE_POINTERDOWN: // A second finger is down, so scale:
 						longTapTimer.cancel();
 						if (pTD.LayoutMode == ParallelTextData.LayoutMode_Advanced) {
 							pTD.TurnAdvancedPopupOff();
@@ -141,9 +139,26 @@ public class ParallelTextView extends View {
 			case MotionEvent.ACTION_MOVE:
 				switch (state) {
 					case STATE_POINTERDOWN:
+						float MIN_MOVE_DELTA_INCH = 0.1f;
+
+//						Log.e("PTV", "PDPX= " + Float.toString(pointerDownPositionX));
+//						Log.e("PTV", "VW= " + Float.toString(pTD.viewWidth));
+
+//crw						if (getHeightDiffInches(pointerDownPositionY, y) > MIN_MOVE_DELTA_INCH) { // vertical movement
+//middle third of screen only, reserve rest for page drag:
 						if (getHeightDiffInches(pointerDownPositionY, y) > MIN_MOVE_DELTA_INCH) { // vertical movement
-							setState(STATE_BRIGHTNESS_CHANGE);
-							initialBrightness = pTD.brightness;
+							if ((pTD.LayoutMode == pTD.LayoutMode_Normal) &&
+								(pointerDownPositionX > (pTD.viewWidth / 3)
+														&& pointerDownPositionX < pTD.viewWidth / 1.5)) {
+								setState(STATE_BRIGHTNESS_CHANGE);
+								initialBrightness = pTD.brightness;
+								lastBrightY = y;
+						// Scroll up/down a line if finger moved at least that far:
+							} else {
+								setState(STATE_SCROLL);
+								scrollY = pointerDownPositionY; // Track finger movement
+//								Log.e("PTV", "scroll1");
+							}
 						} else if (getWidthDiffInches(pointerDownPositionX, x) > MIN_MOVE_DELTA_INCH) { // horizontal movement
 							if (pTD.LayoutMode == ParallelTextData.LayoutMode_Normal
 									&& pTD.opState == 0 && pTD.XonSplitter(pointerDownPositionX, screenDensityX)) {
@@ -173,11 +188,23 @@ public class ParallelTextView extends View {
 									final float distance = getDistance(fx, fy, event.getX(pi), event.getY(pi));
 									final float factor = distance / initialScalingDistance;
 									pTD.fontProportion = (int)(initialFontProportion * factor);
-									if (pTD.fontProportion < 0) {
-										pTD.fontProportion = 0;
+
+//Due to multiplication on line above, once pTD.fontProportion goes negative, 0 here
+// prevents further adjustments until our prefs cache is cleared, so use pTD.fontSizeMin instead:
+//crw									if (pTD.fontProportion < 0) {
+//crw										pTD.fontProportion = 0;
+									if (pTD.fontProportion < pTD.fontSizeMin) {
+										pTD.fontProportion = (int) pTD.fontSizeMin;
 									} else if (pTD.fontProportion > 1000) {
 										pTD.fontProportion = 1000;
 									}
+/*
+									Log.w("PTV", "FP:" + String.format("%04d", pTD.fontProportion)
+													+ " fctr:" + String.format("%.2f", factor)
+													+ " dst:" + String.format("%.2f", distance)
+													+ " ISD:" + String.format("%.2f", initialScalingDistance)
+													+ " IFP:" + initialFontProportion);
+*/
 									pTD.setFontSize(true);
 									break;
 								} else {
@@ -193,7 +220,17 @@ public class ParallelTextView extends View {
 							float newSplitterPosition = x - splitterMoveOffset;
 
 							if (newSplitterPosition != pTD.splitterPosition) {
-
+								if (mainActivity.DoSoundEffects) {
+									// Indicate splitter drag with sound effects.
+									// Calculate rate (pitch):
+									float SERate = (float) (((newSplitterPosition / screenWidth) * 1.5) + .5);
+									// Use +/- 3 to avoid flood of sounds:
+									if (newSplitterPosition < pTD.splitterPosition - 3)
+										// For now we use 1 effect for left/right, this code allows 2 if desired:
+										mainActivity.SoundEffect(6, .2f, .2f, SERate);
+									else if (newSplitterPosition > pTD.splitterPosition + 3)
+										mainActivity.SoundEffect(6, .2f, .2f, SERate);
+								}
 								pTD.setSplitterPosition(newSplitterPosition);
 								pTD.SetSplitterRatioByPosition();
 								pTD.ProcessLayoutChange(false);
@@ -209,16 +246,37 @@ public class ParallelTextView extends View {
 						}
 						invalidate();
 						break;
+
+					case STATE_SCROLL:
+//						Log.e("PTV", "scroll2");
+//						Log.e("PTV", "PDPY=" + Float.toString(pointerDownPositionY));
+//						Log.e("PTV", "SY=" + Float.toString(scrollY));
+//						Log.e("PTV", "Y=" + Float.toString(y));
+
+						if (Math.abs(scrollY - y) > pTD.lineHeight) { // large vertical movement
+							if (y < scrollY)
+								pTD.ProcessKeyDown(); // scroll text up (move forwards in text)
+							else
+								pTD.ProcessKeyUp();   // scroll text down
+							if (mainActivity.DoSoundEffects) mainActivity.SoundEffect(2, .2f, .2f, 1);
+							scrollY = y;
+						}
+						break;
+
 					case STATE_BRIGHTNESS_CHANGE:
 						final double delta = (y - pointerDownPositionY) / screenHeight * 2.0;
-						pTD.brightness = initialBrightness + delta;
-						if (pTD.brightness < 0.5) {
-							pTD.brightness = 0.5f;
-						} else if (pTD.brightness > 1.0) {
-							pTD.brightness = 1.0;
+						if (Math.abs(lastBrightY - y) > 5) {  // Lower sensitivity
+							pTD.brightness = initialBrightness + delta;
+							if (pTD.brightness < 0.5) {
+								pTD.brightness = 0.5f;
+							} else if (pTD.brightness > 1.0) {
+								pTD.brightness = 1.0;
+							}
+							if (mainActivity.DoSoundEffects) mainActivity.SoundEffect(5, .2f, .2f, 1);
+							pTD.SetColorsByBrightness();
+							invalidateParallelText();
 						}
-						pTD.SetColorsByBrightness();
-						invalidateParallelText();
+						lastBrightY = y;
 						break;
 				}
 				break;
@@ -240,8 +298,9 @@ public class ParallelTextView extends View {
 						final long time = System.currentTimeMillis();
 
 						setState(STATE_IDLE);
+						int DOUBLE_TAP_DELAY = 500;
 						if (time - lastSingleTapTime < DOUBLE_TAP_DELAY) {
-							processDoubleTap();
+//							processDoubleTap();
 							lastSingleTapTime = 0;
 						} else {
 							processSingleTap(x, y);
@@ -255,26 +314,33 @@ public class ParallelTextView extends View {
 						setState(STATE_IDLE);
 						return true;
 					case STATE_BRIGHTNESS_CHANGE:
+					case STATE_SCROLL:
 						setState(STATE_IDLE);
 						return true;
 					case STATE_DRAGGING_PAGE:
+						setState(switchingToNextPage ? STATE_PAGEDRAGFINISHING : STATE_PAGEDRAGREVERTING);
+						if (mainActivity.DoSoundEffects) mainActivity.SoundEffect(3, .8f, .8f, 1);
+						startPageAnimation(floatingPagePosition);
+						return true;
+/*
 						if (switchingToNextPage) {
-							if (!switchingToNextPage) { // revert page change
+//							if (!switchingToNextPage) { // revert page change
 								suppressParallelTextRedrawing = true;
 								pTD.ProcessPageDown();
 								suppressParallelTextRedrawing = false;
-							}
+//							}
 							setState(STATE_PAGEDRAGFINISHING);
 						} else {
-							if (switchingToNextPage) { // revert page change
+//							if (switchingToNextPage) { // revert page change
 								suppressParallelTextRedrawing = true;
 								pTD.ProcessPageUp();
 								suppressParallelTextRedrawing = false;
-							}
+//							}
 							setState(STATE_PAGEDRAGREVERTING);
 						}
 						startPageAnimation(floatingPagePosition);
 						return true;
+*/
 				}
 				break;
 		}
@@ -335,16 +401,12 @@ public class ParallelTextView extends View {
 		pTD.LastMouseY = y;
 
 		if (pTD.LayoutMode == ParallelTextData.LayoutMode_Advanced) {
-			pTD.ProcessMousePosition(true, true);
+			pTD.ProcessMousePosition();
 		}
 	}
 
 	private void processLongTap() {
 		mainActivity.openContextMenu(this);
-	}
-
-	private void processDoubleTap() {
-
 	}
 
 	@Override
@@ -392,8 +454,8 @@ public class ParallelTextView extends View {
 		if (state == STATE_PAGEDRAGFINISHING || state == STATE_PAGEDRAGREVERTING) // animating
 		{
 			final float finalPagePos = state == STATE_PAGEDRAGFINISHING ? (-screenWidth - shadowWidth) : 0.0f;
-
-			final float coef = (System.currentTimeMillis() - pageAnimationStartTime) / (float)PAGE_ANIMATION_DURATION;
+			long PAGE_ANIMATION_DURATION = 300;
+			final float coef = (System.currentTimeMillis() - pageAnimationStartTime) / (float) PAGE_ANIMATION_DURATION;
 
 			if (coef >= 1.0f) {
 				floatingPagePosition = 0.0f;

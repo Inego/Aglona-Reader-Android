@@ -3,19 +3,21 @@ package ru.parallelbooks.aglonareader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-import java.util.Map;
 import java.util.TreeMap;
 
+import android.app.Activity;
+import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.LinearGradient;
 import android.graphics.Paint;
-import android.graphics.Paint.FontMetrics;
 import android.graphics.Paint.Style;
 import android.graphics.Path;
-import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Shader.TileMode;
+import android.speech.tts.TextToSpeech;
+import android.util.Log;
+import android.widget.Toast;
 
 public class ParallelTextData {
 
@@ -33,87 +35,84 @@ public class ParallelTextData {
 		return (instance != null);
 	}
 
-	public static void dereferenceInstance() {
-		instance = null;
-	}
-
 	private int Advanced_HighlightedPair;
-	public Frame AdvancedHighlightFrame;
-	public PopUpInfo popUpInfo;
-	int popUpColor;
-	int popUpTextColor;
+	private final Frame AdvancedHighlightFrame;
+	private final PopUpInfo popUpInfo;
+	private ArrayList<WordInfo> wordsToSpeak = null;
+	private final int popUpColor;
+	private final int popUpTextColor;
 	
 	private float indentLength;
 
 	public final static int LayoutMode_Normal = 0;
-	public final static int LayoutMode_Alternating = 1;
+	private final static int LayoutMode_Alternating = 1;
 	public final static int LayoutMode_Advanced = 2;
 
-	public static int popUpOffsetX = 7;
-	public static int popUpOffsetY = 7;
+	private static final int popUpOffsetX = 7;
+	private static final int popUpOffsetY = 7;
 
 	public int opState;
 
 	public int LayoutMode;
 
-	public static final float FINGERTIP = 0.1f;
+	private static final float FINGERTIP = 0.1f;
 
-	public int FirstRenderedPair;
-	public int LastRenderedPair;
+	private int FirstRenderedPair;
+	private int LastRenderedPair;
 
-	public Canvas canvas;
+	private Canvas canvas;
 
 	public ParallelText pText;
 
 	// Had to be sorted, but there are no SortedLists in Java
-	private TreeMap<Integer, ArrayList<ScreenWord>> wordsOnScreen;
+	private final TreeMap<Integer, ArrayList<ScreenWord>> wordsOnScreen;
 
 	public int CurrentPair;
 
-	public int PanelMargin;
+	private final int PanelMargin;
 
 	public float splitterPosition;
 
-	private int splitterWidth;
+	private final int splitterWidth;
 
 	public boolean reversed;
 
-	public int NumberOfScreenLines;
+	private int NumberOfScreenLines;
 
 	public boolean HighlightFirstWords;
 	public boolean HighlightFragments;
+	public boolean SpeakText;
 
 	// Contains H values of text color table
-	ArrayList<Double> colorTableH;
-	ArrayList<Integer> darkColorTable;
-	ArrayList<Integer> lightColorTable;
+	private ArrayList<Double> colorTableH;
+	private ArrayList<Integer> darkColorTable;
+	private ArrayList<Integer> lightColorTable;
 
 	private float leftWidth;
 
 	private float rightWidth;
-
-	public float rightPosition;
-
-	byte NumberofColors;
+	private byte NumberofColors;
 
 	public int viewWidth;
 
-	public Paint paint;
+	private final Paint paint;
 
 	public int viewHeight;
 
-	private int vMargin;
+	private final int vMargin;
 
+//	private Float lineHeight;
+// need for scroll calculation:
 	public Float lineHeight;
 
 	// 0 = not set; 1 = black; 2 = gray
-	int currentTextColor;
+	private int currentTextColor;
 
-	public int LastFullScreenLine;
+	private int LastFullScreenLine;
 
 	private float textVOffset;
 
-	private ArrayList<AbstractFrame> frames;
+	private final ArrayList<AbstractFrame> frames;
 
 	private float text1start;
 	private float text1end;
@@ -123,11 +122,12 @@ public class ParallelTextData {
 
 	// The color of the transparent-black rectangle upon which the
 	// "finished percent" is shown
-	int transparentBlack = Color.argb(100, 0, 0, 0);
+	private final int transparentBlack = Color.argb(100, 0, 0, 0);
 
-	float textFontSize;
+	private float textFontSize;
 
-	private Frame selectionFrame;
+
+	/*
 	private byte selectionSide;
 
 	private int Selection1Pair;
@@ -137,13 +137,13 @@ public class ParallelTextData {
 	private int Selection1Position;
 
 	private int Selection2Position;
+*/
 
-	private byte frameoffset_x = 5;
-	private int frameoffset_y = 2;
 
-	private HashMap<String, Float> widthDictionary;
+	private final byte frameoffset_x = 5;
+	private final HashMap<String, Float> widthDictionary;
 
-	public Float SpaceLength;
+	private Float SpaceLength;
 
 	public float SplitterRatio;
 
@@ -153,19 +153,17 @@ public class ParallelTextData {
 	public float LastMouseY;
 
 	public ParallelTextView pTV;
-	private ScreenWord mouse_text_word;
+	// --Commented out by Inspection (08/20/15 7:39 PM):private ScreenWord mouse_text_word;
 	
 	public ArrayList<FileUsageInfo> fileUsageInfo;
 	
-	public boolean fontRangeSet;
+	public final boolean fontRangeSet;
 	public float fontSizeMin;
 	public float fontSizeMax;
 	public int fontProportion; // int between 0 and 1000, where 0 is fontSizeMin and 1000 is fontSizeMax
 	
 	public boolean bookOpened = false;
-	
-	
-	
+
 	class ProcessArgs {
 
 		public byte side;
@@ -382,9 +380,6 @@ public class ParallelTextData {
 				p.allLinesComputed1 = true;
 			else
 				p.allLinesComputed2 = true;
-
-			return;
-
 		}
 
 		boolean NeedToLineBreakFirstWord(boolean startParagraph) {
@@ -400,8 +395,8 @@ public class ParallelTextData {
 
 	}
 
-	void DrawBackground(byte side, int line1, float x1, int line2, float x2b,
-			int color) {
+	private void DrawBackground(byte side, int line1, float x1, int line2, float x2b,
+								int color) {
 
 		float textstart;
 		float textend;
@@ -608,7 +603,7 @@ public class ParallelTextData {
 
 	}
 
-	public boolean NotFitOnScreen(TextPair p) {
+	private boolean NotFitOnScreen(TextPair p) {
 
 		if (LayoutMode == LayoutMode_Advanced) {
 			if (reversed)
@@ -667,7 +662,8 @@ public class ParallelTextData {
 		ArrayList<WordInfo> list = p.ComputedWords(side);
 
 		float x;
-		int y = -1;
+//crw		int y = -1;
+		int y;
 
 		ScreenWord prev_screen_word = null;
 		ScreenWord s = null;
@@ -740,8 +736,8 @@ public class ParallelTextData {
 
 	class LayoutVars {
 
-		float offset;
-		byte textSide;
+		final float offset;
+		final byte textSide;
 
 		private LayoutVars(int side) {
 			switch (LayoutMode) {
@@ -844,7 +840,7 @@ public class ParallelTextData {
 
 	}
 
-	public void RenderPairs() {
+	private void RenderPairs() {
 
 		wordsOnScreen.clear();
 		
@@ -931,7 +927,7 @@ public class ParallelTextData {
 
 	}
 
-	public void Render() {
+	private void Render() {
 		// Draw frames
 		for (AbstractFrame f : frames)
 			f.Draw(this);
@@ -952,18 +948,65 @@ public class ParallelTextData {
 
 		// y * lineHeight + textVOffset
 
-		for (WordInfo sw : popUpInfo.words)
+		for (WordInfo sw : popUpInfo.words) {
 			canvas.drawText(sw.word, sw.x1 + PanelMargin + popUpInfo.X,
 					textVOffset + popUpInfo.offsetY * popUpOffsetY
 							+ (popUpInfo.Y + sw.line) * lineHeight, paint);
+		}
 
+		//todo: speak text in all display modes, not just advanced.
+		// Speak the selected text while popup shows its translation:
+		if (SpeakText) {
+			String toSpeak = "";
+			for (WordInfo sw : wordsToSpeak) {
+//			Log.e("PTD word", sw.word);
+				toSpeak += sw.word + " ";
+			}
+
+			Log.e("PTD", "Try to speak: " + toSpeak);
+			// Speak the corresponding (nonpopup) text <crw>:
+			//
+/*
+			String AvailLocales = "";
+			for (Locale aLocale : Locale.getAvailableLocales())
+				AvailLocales += aLocale.toString() + " ";
+
+			Log.e("PTD locales", AvailLocales);
+*/
+			// Get correct Locale to speak in:
+			Locale myLocale;
+			if (reversed)
+				myLocale = new Locale(pText.lang2);
+			else
+				myLocale = new Locale(pText.lang1);
+				Log.e("PTD", "starting language: " + MainActivity.speakT.getLanguage().toString());
+
+			// Use all possible language alternatives:
+			if (MainActivity.speakT.isLanguageAvailable(myLocale)      == TextToSpeech.LANG_AVAILABLE
+					|| MainActivity.speakT.isLanguageAvailable(myLocale) == TextToSpeech.LANG_COUNTRY_AVAILABLE
+					|| MainActivity.speakT.isLanguageAvailable(myLocale) == TextToSpeech.LANG_COUNTRY_VAR_AVAILABLE) {
+				if (MainActivity.speakT.getLanguage() != myLocale) { // not already using
+					Log.e("PTD", "setting Locale to " + myLocale.toString());
+					MainActivity.speakT.setLanguage(myLocale);
+					Log.e("PTD", "current language: " + MainActivity.speakT.getLanguage().toString());
+				}
+				MainActivity.speakT.speak(toSpeak, TextToSpeech.QUEUE_FLUSH, null);
+				Log.e("PTD", "Finished speaking.");
+			} else {
+				Toast.makeText(MainActivity.getInstance(),
+						"Language for document locale \"" + myLocale.toString() +
+								"\" not available.  Disable TTS or add this language to your system.",
+						Toast.LENGTH_LONG).show();
+//			Log.e("PTD", "language for locale \"" + myLocale.toString() + "\" not available" );
+			}
+		}
 	}
 
 	public int Number() {
 		return pText.Number();
 	}
 
-	public TextPair get(int pairIndex) {
+	private TextPair get(int pairIndex) {
 		return pText.get(pairIndex);
 	}
 
@@ -1026,6 +1069,7 @@ public class ParallelTextData {
 
 	}
 
+/*
 	private ScreenWord FindScreenWordByPosition(int pairIndex, int pos,
 			byte side) {
 		if (pos != -1)
@@ -1040,7 +1084,9 @@ public class ParallelTextData {
 		return null;
 
 	}
+*/
 
+/*
 	void UpdateSelectionFrame() {
 
 		if (selectionFrame.side == (byte) 0)
@@ -1078,7 +1124,9 @@ public class ParallelTextData {
 		}
 
 	}
+*/
 
+/*
 	public void AssignProperSelectionOrder(Rect r) {
 		if (Selection1Pair < Selection2Pair || Selection1Pair == Selection2Pair
 				&& Selection1Position <= Selection2Position) {
@@ -1093,11 +1141,13 @@ public class ParallelTextData {
 			r.right = Selection1Position;
 		}
 	}
+*/
 
-	public static boolean IsEasternCharacter(char c) {
+	private static boolean IsEasternCharacter(char c) {
 		return (c >= (char) 0x2e80 && !(c >= (char) 0xac00 && c <= (char) 0xd7a3)); // Hangul
 	}
 
+/*
 	boolean WesternJoint(int firstPair, byte side) {
 
 		TextPair first = pText.get(firstPair);
@@ -1113,6 +1163,7 @@ public class ParallelTextData {
 				&& !IsEasternCharacter(second.GetChar(side, 0));
 
 	}
+*/
 
 	public void DrawFrame(Frame frame) {
 		if (frame == null)
@@ -1135,7 +1186,7 @@ public class ParallelTextData {
 			textstart = text2start;
 			textend = text2end;
 		}
-
+		int frameoffset_y = 2;
 		if (frame.line1 == frame.line2)
 			if (frame.line1 == -1) {
 				// The frame begins and ends beyond the screen
@@ -1234,7 +1285,7 @@ public class ParallelTextData {
 
 	}
 
-	public ScreenWord WordAfterCursor(int line, float lastMouseX2, byte side) {
+	private ScreenWord WordAfterCursor(int line, float lastMouseX2, byte side) {
 		ArrayList<ScreenWord> listOfWords;
 
 		ScreenWord lastWord = null;
@@ -1254,7 +1305,7 @@ public class ParallelTextData {
 		return lastWord;
 	}
 
-	public void ComputeNumberOfScreenLines() {
+	private void ComputeNumberOfScreenLines() {
         //NumberOfScreenLines = (int) ((viewHeight - (2 * vMargin)) / lineHeight);
         // Paint fewer lines of text to provide bottom margin - <crw>:
         NumberOfScreenLines = (int) ((viewHeight - (5 * vMargin)) / lineHeight);		
@@ -1266,7 +1317,7 @@ public class ParallelTextData {
 
 	}
 
-	public void PrepareScreen(int startPair, int requiredLines) {
+	private void PrepareScreen(int startPair, int requiredLines) {
 
 		if (pText.Number() == 0)
 			return;
@@ -1282,7 +1333,7 @@ public class ParallelTextData {
 
 	}
 
-	public void PrepareScreen_Normal(int startPair, int requiredLines) {
+	private void PrepareScreen_Normal(int startPair, int requiredLines) {
 
 		ProcessArgs a1 = new ProcessArgs((byte) 1);
 		ProcessArgs a2 = new ProcessArgs((byte) 2);
@@ -1437,7 +1488,7 @@ public class ParallelTextData {
 
 	}
 
-	public void PrepareScreen_Alternating(int startPair, int requiredLines) {
+	private void PrepareScreen_Alternating(int startPair, int requiredLines) {
 
 		ProcessArgs a = new ProcessArgs((byte) 0);
 
@@ -1584,7 +1635,7 @@ public class ParallelTextData {
 
 	}
 
-	public void PrepareScreen_Advanced(int startPair, int requiredLines) {
+	private void PrepareScreen_Advanced(int startPair, int requiredLines) {
 
 		ProcessArgs a = new ProcessArgs(reversed ? (byte) 2 : (byte) 1);
 
@@ -1725,7 +1776,7 @@ public class ParallelTextData {
 		UpdateScreen();
 	}
 
-	public Float WordWidth(String word) {
+	private Float WordWidth(String word) {
 		// First, try to use data from the dictionary if it's there
 		Float result = widthDictionary.get(word);
 		if (result == null) {
@@ -1736,7 +1787,7 @@ public class ParallelTextData {
 		return result;
 	}
 
-	public static String GetWord(TextPair p, byte side, int pos) {
+	private static String GetWord(TextPair p, byte side, int pos) {
 		char c;
 
 		StringBuilder word = new StringBuilder();
@@ -1787,13 +1838,13 @@ public class ParallelTextData {
 
 	}
 
-	public void CreateNewParallelBook() {
+	private void CreateNewParallelBook() {
 		pText = new ParallelText();
 		CurrentPair = 0;
 		reversed = false;
 	}
 
-	public void ComputeSpaceLength() {
+	private void ComputeSpaceLength() {
 		widthDictionary.clear();
 		SpaceLength = WordWidth(" ");
 
@@ -1805,7 +1856,7 @@ public class ParallelTextData {
 
 	}
 
-	public void ComputeSideCoordinates() {
+	private void ComputeSideCoordinates() {
 
 		if (LayoutMode == LayoutMode_Alternating
 				|| LayoutMode == LayoutMode_Advanced) {
@@ -1839,7 +1890,7 @@ public class ParallelTextData {
 
 		leftWidth = splitterPosition;
 		rightWidth = this.viewWidth - splitterWidth - leftWidth;
-		rightPosition = splitterPosition + splitterWidth;
+//		float rightPosition = splitterPosition + splitterWidth;
 
 		ComputeSideCoordinates();
 	}
@@ -1941,9 +1992,11 @@ public class ParallelTextData {
 				(int) (b * 255.0f));
 	}
 
+/*
 	public double getBrightness() {
 		return brightness;
 	}
+*/
 
 	public void setBrightness(double brightness) {
 		this.brightness = brightness;
@@ -1952,7 +2005,7 @@ public class ParallelTextData {
 
 	}
 
-	public ParallelTextData() {
+	private ParallelTextData() {
 
 		CreateNewParallelBook();
 		
@@ -1975,9 +2028,8 @@ public class ParallelTextData {
 
 		frames = new ArrayList<AbstractFrame>();
 
-		Pen selectionPen = new Pen(Color.BLACK, 2.0F);
-
-		selectionFrame = new Frame(selectionPen, frames);
+		Pen selectionPen = new Pen(Color.BLACK);
+//		Frame selectionFrame = new Frame(selectionPen, frames);
 
 		widthDictionary = new HashMap<String, Float>();
 
@@ -1990,7 +2042,7 @@ public class ParallelTextData {
 
 		// ADVANCED MODE POPUP
 		popUpInfo = new PopUpInfo();
-		Pen AdvancedHighlightPen = new Pen(0xFF4682B4, 2.0F);
+		Pen AdvancedHighlightPen = new Pen(0xFF4682B4);
 		AdvancedHighlightFrame = new Frame(AdvancedHighlightPen, frames);
 		int popUpOpacity = 210;
 		popUpColor = Color.argb(popUpOpacity, 0, 0, 0);
@@ -2026,6 +2078,7 @@ public class ParallelTextData {
 		}
 
 	}
+
 
 	public void ProcessKeyDown() {
 
@@ -2066,7 +2119,8 @@ public class ParallelTextData {
 		if (newCurrentPair != CurrentPair)
 			GotoPair(newCurrentPair);
 	}
-	
+
+
 
 	public void ProcessPageUp() {
 
@@ -2113,7 +2167,7 @@ public class ParallelTextData {
 
 	}
 
-	void ComputeIndent() {
+	private void ComputeIndent() {
 		indentLength = (LayoutMode == LayoutMode_Normal ? 0 : SpaceLength * 8);
 	}
 
@@ -2128,7 +2182,7 @@ public class ParallelTextData {
 		
 	}
 
-	public void ProcessMousePosition(boolean forced, boolean renderRequired) {
+	public void ProcessMousePosition() {
 		// Let's check whether the cursor points to a Word
 
 		// Compute current Line
@@ -2141,9 +2195,10 @@ public class ParallelTextData {
 
 		// Let's see what we've got on this Line
 
-		ScreenWord found_word = WordAfterCursor(line, LastMouseX, (byte) side);
+//		ScreenWord found_word = WordAfterCursor(line, LastMouseX, (byte) side);
+		ScreenWord mouse_text_word = WordAfterCursor(line, LastMouseX, (byte) side);
 
-		mouse_text_word = found_word;
+//		mouse_text_word = found_word;
 
 		if (LayoutMode == LayoutMode_Advanced) {
 
@@ -2178,6 +2233,7 @@ public class ParallelTextData {
 						AdvancedHighlightFrame.x2 = r.x2;
 
 						byte trSide = (reversed ? (byte) 1 : (byte) 2);
+						byte orSide = (reversed ? (byte) 2 : (byte) 1); //ORiginal Side <crw>
 
 						ProcessArgs a = new ProcessArgs(trSide);
 
@@ -2193,7 +2249,9 @@ public class ParallelTextData {
 							a.ProcessTextFromPair();
 							ParallelText.InsertWords(a.words, 0);
 							c = p.ComputedWords(trSide);
-
+							// We pop up the "to" language and speak the "from" language:
+							if (SpeakText)
+								wordsToSpeak = p.ComputedWords(orSide); //crw
 						}
 
 						if (c != null && c.size() != 0) {
@@ -2211,10 +2269,12 @@ public class ParallelTextData {
 
 					}
 
+/*
 					else // !r.Valid
 					{
 
 					}
+*/
 
 				}
 
@@ -2321,10 +2381,6 @@ public class ParallelTextData {
 		Advanced_HighlightedPair = -1;
 
 	}
-	
-	
-	private static float minNumberOfLines = 16;
-	private static float maxNumberOfLines = 50;
 
 	public void setFontRange(int w, int h) {
 		
@@ -2338,13 +2394,14 @@ public class ParallelTextData {
 			max = h;
 			min = w;
 		}
-		
+		float maxNumberOfLines = 50;
 		fontSizeMin = max / maxNumberOfLines;
+		float minNumberOfLines = 16;
 		fontSizeMax = min / minNumberOfLines;
 		
 	}
 	
-	public void setFontSizeByMinMaxProportion() {
+	private void setFontSizeByMinMaxProportion() {
 		
 		textFontSize = fontSizeMin + (fontSizeMax - fontSizeMin) * fontProportion / 1000;
 		
@@ -2372,7 +2429,5 @@ public class ParallelTextData {
 		pTV.updateNoBookVisibility();
 		PrepareScreen();
 	}
-
-	
 
 }

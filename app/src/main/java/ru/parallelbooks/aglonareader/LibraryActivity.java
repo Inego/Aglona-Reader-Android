@@ -19,11 +19,11 @@ import android.widget.TextView;
 
 public class LibraryActivity extends ListActivity {
 	
-	ParallelTextData pTD;
+	private ParallelTextData pTD;
 
 	private class LibraryAdapter extends BaseAdapter {
 
-		private ArrayList<FileUsageInfo> mData;
+		private final ArrayList<FileUsageInfo> mData;
 
 		public LibraryAdapter() {
 			mData = pTD.fileUsageInfo;
@@ -143,7 +143,7 @@ public class LibraryActivity extends ListActivity {
 		finish();
 	}
 
-	public void onAddFromSDCard(View v) {
+ 	public void onAddFromSDCard(View v) {
 
 		Intent intent = new Intent(this, SelectFileActivity.class);
 		startActivityForResult(intent, 0);

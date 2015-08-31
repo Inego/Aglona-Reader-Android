@@ -3,13 +3,13 @@ package ru.parallelbooks.aglonareader;
 
 public class Pen {
 	
-	int color;
+	final int color;
 	
-	float thickness;
+	final float thickness;
 	
-	public Pen(int color, float thickness) {
+	public Pen(int color) {
 		this.color = color;
-		this.thickness = thickness;
+		this.thickness = 2.0F;
 	}
 
 }

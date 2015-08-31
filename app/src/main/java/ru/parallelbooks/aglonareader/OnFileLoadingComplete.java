@@ -1,6 +1,6 @@
 package ru.parallelbooks.aglonareader;
 
-public interface OnFileLoadingComplete {
+interface OnFileLoadingComplete {
 	
 	void onFileLoadingComplete(boolean success, String fileName);
 

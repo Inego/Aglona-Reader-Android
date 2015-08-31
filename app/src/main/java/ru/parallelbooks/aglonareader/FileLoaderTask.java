@@ -7,9 +7,9 @@ import android.os.AsyncTask;
 
 
 
-public class FileLoaderTask<T extends Activity & OnFileLoadingComplete> extends AsyncTask<Void, Void, Boolean> {
+class FileLoaderTask<T extends Activity & OnFileLoadingComplete> extends AsyncTask<Void, Void, Boolean> {
 	
-	private String fileName;
+	private final String fileName;
 	private T activity;
 	private ProgressDialog dialog;
 
@@ -26,7 +26,7 @@ public class FileLoaderTask<T extends Activity & OnFileLoadingComplete> extends 
 		super.onPreExecute();
 	}
 
-	public void showProgressDialog() {
+	private void showProgressDialog() {
 
 		dialog = new ProgressDialog(activity);
 
@@ -53,7 +53,6 @@ public class FileLoaderTask<T extends Activity & OnFileLoadingComplete> extends 
 	protected Boolean doInBackground(Void... unused) {
 		
 		ParallelText pText = new ParallelText();
-		pText = new ParallelText();
 		
 		boolean result = pText.Load(fileName);
 		
@@ -81,8 +80,10 @@ public class FileLoaderTask<T extends Activity & OnFileLoadingComplete> extends 
 		super.onPostExecute(result);
 	}
 
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
-	}
-	
+// --Commented out by Inspection START (08/20/15 7:44 PM):
+//	public void setFileName(String fileName) {
+//		this.fileName = fileName;
+//	}
+// --Commented out by Inspection STOP (08/20/15 7:44 PM)
+
 }

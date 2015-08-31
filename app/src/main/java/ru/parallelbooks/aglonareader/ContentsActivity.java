@@ -18,9 +18,9 @@ public class ContentsActivity extends ListActivity {
 
 	class ContentsAdapter extends BaseAdapter {
 
-		ParallelText pText;
+		final ParallelText pText;
 
-		BookContents contents;
+		final BookContents contents;
 
 		public int side;
 

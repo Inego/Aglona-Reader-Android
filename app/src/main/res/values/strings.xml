@@ -8,7 +8,9 @@
     <string name="pref_category_highlighting">Color highlighting</string>
     <string name="pref_title_highlight_first_words">First words</string>
     <string name="pref_title_highlight_fragments">Fragments</string>
-    <string name="pref_title_highlight_brightness">Brightness</string>
+	<string name="pref_title_speak_text">Speak selected text (advanced reading mode only)</string>
+	<string name="pref_title_sound_effects">Sound effects</string>
+	<string name="pref_title_highlight_brightness">Brightness</string>
     <string name="pref_title_font_size">Font size</string>
     <string name="pref_summary_font_size">Adjust font size with a slider</string>
     <string name="pref_summary_off_book_reverse">Source on the left, translation on the right</string>
@@ -37,5 +39,6 @@
 	<string name="contents_are_empty">No structure information present</string>
 	<string name="left">Left</string>
 	<string name="right">Right</string>
-	<string name="error_loading_file">An error happened while trying to load the file!\nFile absent or format incorrect</string>	
+	<string name="error_loading_file">An error happened while trying to load the file!\nFile absent or format incorrect</string>
+	<string name="tts_init_fail">Warning: Android text-to-speech system failed to initialize.</string>
 </resources>

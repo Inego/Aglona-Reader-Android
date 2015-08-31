@@ -1,9 +1,9 @@
 package ru.parallelbooks.aglonareader;
 
-public class CommonWordInfo extends WordInfo {
+class CommonWordInfo extends WordInfo {
 	
-	public TextPair textPair;
-	public byte side;
+	public final TextPair textPair;
+	public final byte side;
 
     public CommonWordInfo(TextPair textPair, String word, int line, float newStart, float f, int pos, boolean eastern, byte side)
     {

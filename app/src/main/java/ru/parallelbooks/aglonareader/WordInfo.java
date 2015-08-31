@@ -1,13 +1,13 @@
 package ru.parallelbooks.aglonareader;
 
-public class WordInfo {
+class WordInfo {
 	
-	public String word;
+	public final String word;
     public int line;
-    public float x1;
-    public float x2;
-    public int pos;
-    public boolean eastern;
+    public final float x1;
+    public final float x2;
+    public final int pos;
+    public final boolean eastern;
 
     public WordInfo(String word, int line, float newStart, float f, int pos, boolean eastern)
     {

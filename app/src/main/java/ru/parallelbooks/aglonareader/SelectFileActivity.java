@@ -19,9 +19,9 @@ import android.widget.TextView;
 public class SelectFileActivity extends Activity {
 
 	class FilePathData implements Comparable<FilePathData> {
-		boolean isDirectory;
-		String name;
-		String fullPath;
+		final boolean isDirectory;
+		final String name;
+		final String fullPath;
 
 		public FilePathData(boolean isDirectory, String name, String fullPath) {
 			this.isDirectory = isDirectory;
@@ -40,14 +40,13 @@ public class SelectFileActivity extends Activity {
 
 	}
 
-	private File currentDir;
 	private String TopPath;
 
-	LinearLayout linearLayout;
+	private LinearLayout linearLayout;
 
-	List<FilePathData> dir = new ArrayList<FilePathData>();
+	private final List<FilePathData> dir = new ArrayList<FilePathData>();
 
-	OnClickListener oncl = new OnClickListener() {
+	private final OnClickListener oncl = new OnClickListener() {
 
 		@Override
 		public void onClick(View v) {
@@ -141,8 +140,7 @@ public class SelectFileActivity extends Activity {
 		linearLayout = (LinearLayout) findViewById(R.id.select_file_linear);
 
 		TopPath = Environment.getExternalStorageDirectory().getPath();
-
-		currentDir = new File(TopPath);
+		File currentDir = new File(TopPath);
 
 		fillTheList(currentDir);
 
