@@ -1,0 +1,106 @@
+
+Added this changes.txt file to make tracking more transparent (assuming it's kept up to date)
+Changed version to 1.0.2.4
+Advanced popup and TTS now terminate upon SCROLL actions
+Brightness control is now same as divider, not central 1/3 of screen
+Doubled width of "FINGERTIP" from .1 to .2 inch providing wider area for divider drag or brightness control.
+Brightness control sound effect now rises/falls with brightness change
+Reversed brightness control so up is brighter, down is darker
+Reformatted MainActivity.java, ParallelTextView.java and ParallelTextData.java for clarity and deleted commented-out code.
+Reconfigured some areas of code marked as "probable bug" or "redundant" or "unused" by Android Studio as recommended by AS.
+Corrected problem where spoken text did not match popup under some conditions.
+Corrected problem of grayed-out fragments at end of screen containing entire sentences.
+Moved variable "opstate" from ParallelTextData.java to ParallelTextView.java since this is (now?) the only location it is used from.
+
+TODO:
+- Add TTS speed and pitch settings to prefs (currently controlled by system settings)
+- Add TTS to normal and alternating display modes
+- Fix normal mode color spillover at top of screen
+- Improve file navigation; sometimes directories appear to be unavailable
+- Improve startup time of TTS when language changes, possibly by preloading a second thread
+- Divider should be horizontal on vertical tablet orientation, currently vertical on all orientations
+- Analyze possible overuse of pTD, etc., to import/export context
+- Investigate small screen slider sound effect performance; possibly we need a different metric to time sound effect calls
+
+commit d5ad87d11608c81dbf31356c1b16b981b4b8a466
+Author: code-read <github@carsonwilson.com>
+Date:   Mon Aug 31 08:43:55 2015 -0500
+
+    1. Commented many areas of code flagged as unused and applied several code
+    logic changes as recommended by Android Studio (Analyze-->Inspect).
+    2. Added Android TTS (Text To Speech) to Advanced Reading mode.  When a
+    section is tapped, its translation is shown (as before) and it is spoken
+    in its untranslated language.  Toasts appear for error conditions. This
+    function may be disabled entirely via Settings.
+    3. Modified "Brightness" control to respond to vertical swipes on central vertical 1/3 of
+    screen only.  Rest of screen (and entire screen in Alternating and
+    Advanced modes) scrolls text back/forward by line in response to vertical swipes.
+    4. Added sound effects for page turn, scroll, Brightness control, program
+    (re)start, which may be disabled via Settings.
+    5. Corrected problem (in PTV) which caused font size control to stop working if
+    pinch control was used past smallest font.
+    6. Changed version to 1.0.2.3
+
+commit 2908445fdf056dcee5dffe93f8782e31bca1fb2a
+Author: Inego <yanis.batura@gmail.com>
+Date:   Sun Aug 16 20:53:17 2015 +0600
+
+    Changes made by the latest version of AS
+
+commit 835bb105ff4a2e9a6d457ba00a4be1d2ce1e0b39
+Merge: 50dfe6b 0814efe
+Author: Inego <yanis.batura@gmail.com>
+Date:   Sat Aug 15 11:42:14 2015 +0600
+
+    Merge remote-tracking branch 'remotes/YevhenRezohlazov/master' into 2015-06-yevhen
+
+commit 0814efe4bf6c9865c52271264e47a586bcac777c
+Author: code-read <github@carsonwilson.com>
+Date:   Mon Jul 27 12:30:09 2015 -0500
+
+    I've made several tweaks to provide a margin
+    between the text and edges of the screen.  All changes
+    commented as <crw>.
+
+commit d178885417f99e0fcc5d3990127a1770db73184e
+Author: Yevhen Rezohlazov <yevhen.rezohlazov@gmail.com>
+Date:   Mon Jun 29 19:03:34 2015 +0300
+
+    Reworked user interaction mechanics.
+    1. Menu can be called by long tap (as it was inaccesible on devices without hardware menu bu
+tton)
+    2. Font size is controlled by two-finger scale gesture
+    3. Brightness is controlled by vertical swiping.
+    4. Pages are changed by horizontal swiping or volume buttons.
+
+commit c8d4eccb9ab5a901d3c895cc40d33acedd668adb
+Author: Yevhen Rezohlazov <yevhen.rezohlazov@gmail.com>
+Date:   Sun Jun 28 18:36:47 2015 +0300
+
+    Fixed issue with obtainig file list on Android API >= 19.
+
+commit f057ac0aafea298ad34f04b067dc3d0edadb5742
+Author: Yevhen Rezohlazov <yevhen.rezohlazov@gmail.com>
+Date:   Sat Jun 27 18:48:01 2015 +0300
+
+    Migrated project to Android Studio.
+
+commit 50dfe6b7b72ac3cceb4eda8dd45d0b8046f6bb7d
+Author: Inego <yanis.batura@gmail.com>
+Date:   Sun Jul 7 22:29:58 2013 +0700
+
+    1.0.2.1   BUG FIX
+
+    Color brightness preference was neither saved nor used
+
+commit 2dac00533d9602171f352ea2282f48253180d6d7
+Author: Inego <yanis.batura@gmail.com>
+Date:   Sat Apr 20 17:15:48 2013 +0700
+
+    1.0.2.0 INITIAL source code uploaded
+
+commit e6910d3b830651ed53a5d75ed858e662cfb47954
+Author: Inego <yanis.batura@gmail.com>
+Date:   Sat Apr 20 02:59:11 2013 -0700
+
+    Initial commit
